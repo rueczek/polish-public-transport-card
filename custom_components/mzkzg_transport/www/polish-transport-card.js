@@ -1287,8 +1287,16 @@ class MzkzgTransportCard extends HTMLElement {
       return ma - mb;
     });
 
-    const cap = d._entityConfig?.max_departures || c.max_departures;
-    return deps.slice(0, cap);
+    // Per-entity max_departures caps each sensor; the global cap limits the total
+    const perEntity = new Map();
+    deps = deps.filter(d => {
+      const cap = d._entityConfig?.max_departures;
+      if (d._header || !cap) return true;
+      const n = (perEntity.get(d._entityId) || 0) + 1;
+      perEntity.set(d._entityId, n);
+      return n <= cap;
+    });
+    return deps.slice(0, c.max_departures);
   }
 
   _preloadLeaflet() {
