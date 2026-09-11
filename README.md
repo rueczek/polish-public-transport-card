@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-90%20passed-success.svg)]()
 
-Home Assistant integration + Lovelace card for real-time public transport departures across Poland — **53 operators, 35 GTFS-RT cities with live GPS vehicle map**.
+Home Assistant integration + Lovelace card for real-time public transport departures across Poland — **54 operators, 35 GTFS-RT cities with live GPS vehicle map**.
 
 ![Standard light](docs/screenshots/standard-light.png)
 
@@ -50,17 +50,18 @@ Home Assistant integration + Lovelace card for real-time public transport depart
 | [ZKM Gdynia](https://zkmgdynia.pl) | Gdynia (bus, trolley) | ZDiZ API | ✅ | ❌ | side number |
 | [MZK Wejherowo](https://mzkwejherowo.pl) | Wejherowo (bus) | Static GTFS | ❌ | ❌ | — |
 | [Time4BUS Tczew](https://time4bus.com) | Tczew (bus) | Time4BUS | ✅ | ❌ | wheelchair, AC |
-| [PKS Gdańsk](https://pksgdansk.pl) | Pomorskie (regional) | kiedyPrzyjedzie | ✅ | ❌ | bike, wheelchair, AC |
-| [Albatros](https://albatros.kiedyprzyjedzie.pl) | Pomorskie (regional) | kiedyPrzyjedzie | ✅ | ❌ | bike, wheelchair, AC |
-| [GRYF](https://gryf.kiedyprzyjedzie.pl) | Pomorskie (regional) | kiedyPrzyjedzie | ✅ | ❌ | bike, wheelchair, AC |
-| [Nord Express](https://nordexpress.kiedyprzyjedzie.pl) | Słupsk region | kiedyPrzyjedzie | ✅ | ❌ | bike, wheelchair, AC |
-| [PKS Gdynia](https://pksgdynia.pl) | Gdynia region | kiedyPrzyjedzie | ✅ | ❌ | bike, wheelchair, AC |
-| [MZK Malbork](https://malbork.kiedyprzyjedzie.pl) | Malbork (city) | kiedyPrzyjedzie | ✅ | ❌ | bike, wheelchair, AC |
-| [PKS Słupsk](https://pksslupsk.pl) | Słupsk region | kiedyPrzyjedzie | ✅ | ❌ | bike, wheelchair, AC |
-| [MZK Starogard Gd.](https://starogard.kiedyprzyjedzie.pl) | Starogard (city) | kiedyPrzyjedzie | ✅ | ❌ | bike, wheelchair, AC |
-| [PKS Starogard Gd.](https://pksstarogard.kiedyprzyjedzie.pl) | Starogard region | kiedyPrzyjedzie | ✅ | ❌ | bike, wheelchair, AC |
-| [Komunikacja Bytów](https://bytow.kiedyprzyjedzie.pl) | Bytów (city) | kiedyPrzyjedzie | ✅ | ❌ | bike, wheelchair, AC |
-| [Powiat Człuchowski](https://czluchow.kiedyprzyjedzie.pl) | Człuchów region | kiedyPrzyjedzie | ✅ | ❌ | bike, wheelchair, AC |
+| [PKS Gdańsk](https://pksgdansk.pl) | Pomorskie (regional) | kiedyPrzyjedzie | ✅ | 🗺️² | bike, wheelchair, AC |
+| [Albatros](https://albatros.kiedyprzyjedzie.pl) | Pomorskie (regional) | kiedyPrzyjedzie | ✅ | 🗺️² | bike, wheelchair, AC |
+| [GRYF](https://gryf.kiedyprzyjedzie.pl) | Pomorskie (regional) | kiedyPrzyjedzie | ✅ | 🗺️² | bike, wheelchair, AC |
+| [Nord Express](https://nordexpress.kiedyprzyjedzie.pl) | Słupsk region | kiedyPrzyjedzie | ✅ | 🗺️² | bike, wheelchair, AC |
+| [PKS Gdynia](https://pksgdynia.pl) | Gdynia region | kiedyPrzyjedzie | ✅ | 🗺️² | bike, wheelchair, AC |
+| [MZK Malbork](https://malbork.kiedyprzyjedzie.pl) | Malbork (city) | kiedyPrzyjedzie | ✅ | 🗺️² | bike, wheelchair, AC |
+| [PKS Słupsk](https://pksslupsk.pl) | Słupsk region | kiedyPrzyjedzie | ✅ | 🗺️² | bike, wheelchair, AC |
+| [MZK Starogard Gd.](https://starogard.kiedyprzyjedzie.pl) | Starogard (city) | kiedyPrzyjedzie | ✅ | 🗺️² | bike, wheelchair, AC |
+| [PKS Starogard Gd.](https://pksstarogard.kiedyprzyjedzie.pl) | Starogard region | kiedyPrzyjedzie | ✅ | 🗺️² | bike, wheelchair, AC |
+| [Komunikacja Bytów](https://bytow.kiedyprzyjedzie.pl) | Bytów (city) | kiedyPrzyjedzie | ✅ | 🗺️² | bike, wheelchair, AC |
+| [Powiat Człuchowski](https://czluchow.kiedyprzyjedzie.pl) | Człuchów region | kiedyPrzyjedzie | ✅ | 🗺️² | bike, wheelchair, AC |
+| [MZK Kędzierzyn-Koźle](https://mzkkk.kiedyprzyjedzie.pl) | Kędzierzyn-Koźle (city) | kiedyPrzyjedzie | ✅ | 🗺️² | bike, wheelchair, AC |
 | [PKP / SKM / PolRegio / IC](https://portalpasazera.pl) | Railway stations | PLK API | ✅ | ❌ | platform, track, carrier |
 | [MPK Łódź](https://mpk.lodz.pl) | Łódź (bus, tram) | GTFS-RT (official) | ✅ | 🗺️ | 120 bus stop groups |
 | [ZTM Poznań](https://ztm.poznan.pl) | Poznań (bus, tram) | GTFS-RT (ZTM) | ✅ | 🗺️ | ramp, AC, bike, USB |
@@ -102,6 +103,8 @@ Home Assistant integration + Lovelace card for real-time public transport depart
 
 ¹ Kraków: GPS available for **bus** stops via ZTP VehiclePositions route matching. Tram stops have realtime delays but no GPS (vehicle ID mismatch between zbiorkom.live and ZTP feeds).
 
+² kiedyPrzyjedzie: map only for live (estimated) trips that report a GPS fix. Timetable-only rows have no marker.
+
 ### Data Sources
 
 | Source | Cities | RT Format |
@@ -110,7 +113,7 @@ Home Assistant integration + Lovelace card for real-time public transport depart
 | **cdn.zbiorkom.live (CDN)** | Elbląg, Gorzów Wlkp., Kielce, Kutno, Legnica, Lublin, Przemyśl, Radom, Rybnik, Suwałki | GTFS-RT protobuf |
 | **mkuran.pl** | Ełk, WKD, Warszawa | GTFS-RT protobuf / JSON |
 | **City-specific** | Gdańsk, Gdynia, GZM, Kraków, Łódź, Poznań, Szczecin, Wrocław | mixed |
-| **kiedyPrzyjedzie.pl** | 11 regional carriers | REST API |
+| **kiedyPrzyjedzie.pl** | 12 regional carriers | REST API |
 | **PLK OpenData** | PKP / SKM / PolRegio / IC | REST API |
 | **Time4BUS** | Tczew | REST API |
 
@@ -121,6 +124,7 @@ Home Assistant integration + Lovelace card for real-time public transport depart
 When a departure includes GPS coordinates, clicking the row opens a Leaflet map (powered by OpenStreetMap / CARTO tiles). The vehicle marker refreshes every 30 seconds while the map is open.
 
 - **All GTFS-RT cities** support the map via multi-strategy position matching: `vehicle_code` → `trip_id` → `route_id`
+- **kiedyPrzyjedzie.pl** live trips expose GPS via `/api/trip_execution` (`vehicle.lat` / `vehicle.lon`). Scheduled-only rows stay without a marker.
 - Markers show the route number inside a colored circle with a direction arrow
 - The map takes precedence over `tap_action`; hold and double-tap actions remain available
 

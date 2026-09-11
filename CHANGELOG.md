@@ -2,7 +2,8 @@
 
 ## [1.6.0] — unreleased
 
-### New Providers (+8)
+### New Providers (+9)
+- **MZK Kędzierzyn-Koźle** — live departures + GPS via kiedyPrzyjedzie (`mzkkk.kiedyprzyjedzie.pl`)
 - **MKS Mielec** — GTFS-RT + GPS (19 TU, 19 VP) (`api.zbiorkom.live api6-open`)
 - **MZK Oświęcim** — GTFS-RT + GPS (59 TU, 10 VP) (`api.zbiorkom.live api6-open`)
 - **MPK Radomsko** — GTFS-RT + GPS (1 TU, 1 VP) (`api.zbiorkom.live api6-open`)
@@ -11,6 +12,9 @@
 - **KM Kołobrzeg** — static GTFS (`api.zbiorkom.live api6-open`)
 - **SPGK Sanok** — static GTFS (`api.zbiorkom.live api6-open`)
 - **MZK Ostrołęka** — static GTFS (`api.zbiorkom.live api6-open`)
+
+### kiedyPrzyjedzie GPS map
+- Live trips now fetch `/api/trip_execution/{base64(trip_execution_id)}/{trip_index}` and attach `vehicle_lat` / `vehicle_lng` so the Lovelace map opens (up to 8 vehicles per stop, 20 s cache).
 
 ### Card UX Improvements
 - **Per-entity `max_departures`** — override global cap per sensor in the card editor

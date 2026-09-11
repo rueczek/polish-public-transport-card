@@ -1,6 +1,7 @@
 """Extra tests for kiedyPrzyjedzie carrier coverage."""
 
 import asyncio
+import base64
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
@@ -13,6 +14,7 @@ from mzkzg_transport.const import (
     KIEDYPRZYJEDZIE_BYTOW_URL,
     KIEDYPRZYJEDZIE_CZLUCHOW_URL,
     KIEDYPRZYJEDZIE_GRYF_URL,
+    KIEDYPRZYJEDZIE_MZK_KEDZIERZYN_URL,
     KIEDYPRZYJEDZIE_MZK_MALBORK_URL,
     KIEDYPRZYJEDZIE_MZK_STAROGARD_URL,
     KIEDYPRZYJEDZIE_NORD_EXPRESS_URL,
@@ -22,6 +24,7 @@ from mzkzg_transport.const import (
     PROVIDER_BYTOW,
     PROVIDER_CZLUCHOW,
     PROVIDER_GRYF,
+    PROVIDER_MZK_KEDZIERZYN,
     PROVIDER_MZK_MALBORK,
     PROVIDER_MZK_STAROGARD,
     PROVIDER_NORD_EXPRESS,
@@ -219,7 +222,59 @@ def test_kiedyprzyjedzie_extra_urls():
         KIEDYPRZYJEDZIE_PKS_STAROGARD_URL: "pksstarogard.kiedyprzyjedzie.pl",
         KIEDYPRZYJEDZIE_BYTOW_URL: "bytow.kiedyprzyjedzie.pl",
         KIEDYPRZYJEDZIE_CZLUCHOW_URL: "czluchow.kiedyprzyjedzie.pl",
+        KIEDYPRZYJEDZIE_MZK_KEDZIERZYN_URL: "mzkkk.kiedyprzyjedzie.pl",
     }
     for url, host in expected_hosts.items():
         assert url.endswith(host)
     assert set(expected_hosts) <= set(KIEDYPRZYJEDZIE_BASE_URLS.values())
+
+
+@pytest.mark.kiedyprzyjedzie
+@pytest.mark.asyncio
+async def test_kiedyprzyjedzie_gps_from_trip_execution(mock_hass):
+    """Live trip_execution payload should attach vehicle_lat/lng."""
+    from urllib.parse import quote
+
+    stop_id = "1765:4192"
+    trip_execution_id = "101:739870:13"
+    trip_index = 17
+    coordinator = MzkzgTransportCoordinator(
+        mock_hass, stop_id, PROVIDER_MZK_KEDZIERZYN, ""
+    )
+    departures = {
+        "timestamp": int(datetime.now().timestamp()),
+        "station_name": "1 Maja 1",
+        "directions": {"4192000": "Zakłady Azotowe"},
+        "rows": [
+            {
+                "time": "3 min",
+                "static_time": "3 min",
+                "time_diff": 0,
+                "is_estimated": True,
+                "direction_id": 4192000,
+                "line_name": "1",
+                "vehicle_attributes": [],
+                "trip_id": 51502249,
+                "trip_execution_id": trip_execution_id,
+                "trip_index": trip_index,
+            }
+        ],
+    }
+    token = quote(base64.b64encode(trip_execution_id.encode("utf-8")).decode("ascii"), safe="")
+    gps_url = (
+        f"{KIEDYPRZYJEDZIE_MZK_KEDZIERZYN_URL}/api/trip_execution/{token}/{trip_index}"
+    )
+
+    with aioresponses() as mocked:
+        mocked.get(
+            f"{KIEDYPRZYJEDZIE_MZK_KEDZIERZYN_URL}/api/departures/{stop_id}",
+            payload=departures,
+        )
+        mocked.get(
+            gps_url,
+            payload={"vehicle": {"lat": 50.34403, "lon": 18.20735}, "estimated": True},
+        )
+        result = await coordinator._fetch_kiedyprzyjedzie()
+
+    assert result["departures"][0]["vehicle_lat"] == 50.34403
+    assert result["departures"][0]["vehicle_lng"] == 18.20735

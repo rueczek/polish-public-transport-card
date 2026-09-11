@@ -1,12 +1,26 @@
 """kiedyPrzyjedzie provider."""
 
 from datetime import datetime, timedelta
+import asyncio
+import base64
+import logging
 import re
+from urllib.parse import quote
+
+import aiohttp
 
 from homeassistant.util import dt as dt_util
 
-from .const import KIEDYPRZYJEDZIE_BASE_URLS
+from .const import DOMAIN, KIEDYPRZYJEDZIE_BASE_URLS
 from .http_utils import fetch_with_retry
+
+_LOGGER = logging.getLogger(__name__)
+
+# Live GPS comes from per-trip /api/trip_execution — cap requests per refresh.
+MAX_GPS_TRIPS = 8
+GPS_CACHE_TTL = 20.0
+# Stale entries are pruned so the cache does not grow across days of trip ids.
+GPS_CACHE_MAX_AGE = 600.0
 
 
 async def fetch(coord: "MzkzgTransportCoordinator") -> dict:
@@ -84,6 +98,7 @@ async def fetch(coord: "MzkzgTransportCoordinator") -> dict:
         })
 
     departures.sort(key=lambda x: x.get("estimated_time") or "")
+    await _enrich_gps(coord, session, base_url, departures)
     return {
         "stop_id": coord.stop_id,
         "stop_name": coord.stop_name,
@@ -122,3 +137,67 @@ def _parse_time(value, reference_dt: datetime) -> tuple[datetime | None, bool]:
         return dep_dt, False
 
     return None, False
+
+
+def _execution_token(trip_execution_id: str) -> str:
+    """Encode trip_execution_id the same way the official frontend does (base64)."""
+    return base64.b64encode(str(trip_execution_id).encode("utf-8")).decode("ascii")
+
+
+async def _fetch_trip_execution(session: aiohttp.ClientSession, url: str) -> dict | None:
+    """One-shot GET — do not retry 400/401/404 as missing GPS."""
+    try:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+            if resp.status != 200:
+                return None
+            data = await resp.json()
+            return data if isinstance(data, dict) else None
+    except (aiohttp.ClientError, asyncio.TimeoutError, ValueError) as err:
+        _LOGGER.debug("kiedyPrzyjedzie GPS fetch failed for %s: %s", url, err)
+        return None
+
+
+async def _enrich_gps(coord, session: aiohttp.ClientSession, base_url: str, departures: list) -> None:
+    """Attach vehicle_lat/lng from trip_execution for live estimated trips."""
+    cache = coord.hass.data.setdefault(DOMAIN, {}).setdefault("_kp_gps", {})
+    now_ts = dt_util.now().timestamp()
+    for key in [k for k, v in cache.items() if now_ts - v.get("_ts", 0) > GPS_CACHE_MAX_AGE]:
+        cache.pop(key, None)
+
+    candidates = [
+        dep
+        for dep in departures
+        if dep.get("realtime")
+        and dep.get("trip_execution_id") not in (None, "")
+        and dep.get("trip_index") is not None
+        and not dep.get("cancelled")
+    ][:MAX_GPS_TRIPS]
+
+    async def _one(dep: dict) -> None:
+        cache_key = f"{base_url}:{dep['trip_execution_id']}"
+        cached = cache.get(cache_key)
+        if cached and now_ts - cached.get("_ts", 0) < GPS_CACHE_TTL:
+            pos = cached.get("pos")
+            if pos:
+                dep["vehicle_lat"] = pos["lat"]
+                dep["vehicle_lng"] = pos["lng"]
+            return
+
+        token = quote(_execution_token(dep["trip_execution_id"]), safe="")
+        url = f"{base_url}/api/trip_execution/{token}/{dep['trip_index']}"
+        data = await _fetch_trip_execution(session, url)
+        vehicle = (data or {}).get("vehicle") or {}
+        try:
+            lat = float(vehicle["lat"])
+            lon = float(vehicle["lon"])
+        except (KeyError, TypeError, ValueError):
+            cache[cache_key] = {"pos": None, "_ts": now_ts}
+            return
+
+        pos = {"lat": lat, "lng": lon}
+        cache[cache_key] = {"pos": pos, "_ts": now_ts}
+        dep["vehicle_lat"] = lat
+        dep["vehicle_lng"] = lon
+
+    if candidates:
+        await asyncio.gather(*(_one(dep) for dep in candidates))

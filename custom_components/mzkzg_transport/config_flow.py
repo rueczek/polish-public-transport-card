@@ -72,6 +72,7 @@ from .const import (
 
 
     PROVIDER_CZLUCHOW,
+    PROVIDER_MZK_KEDZIERZYN,
 
 
     PROVIDER_GRYF,
@@ -196,6 +197,7 @@ PROVIDER_OPTIONS = {
     PROVIDER_PKS_STAROGARD: "PKS Starogard Gda\u0144ski S.A.",
     PROVIDER_BYTOW: "Byt\u00f3w",
     PROVIDER_CZLUCHOW: "Powiat Cz\u0142uchowski",
+    PROVIDER_MZK_KEDZIERZYN: "MZK K\u0119dzierzyn-Ko\u017ale",
     PROVIDER_TCZEW: "Tczew (Time4BUS)",
     PROVIDER_LODZ: "MPK \u0141\u00f3d\u017a",
     PROVIDER_POZNAN: "ZTM Pozna\u0144",
