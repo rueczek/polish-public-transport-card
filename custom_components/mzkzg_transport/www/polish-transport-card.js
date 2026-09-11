@@ -4,7 +4,7 @@
  * Reads data from mzkzg_transport HA integration sensors.
  */
 
-const MZKZG_VERSION = "1.6.2";
+const MZKZG_VERSION = "1.6.3";
 
 const LOCALE = {
   pl: {
@@ -1376,11 +1376,14 @@ class MzkzgTransportCard extends HTMLElement {
     const createMap = () => {
       requestAnimationFrame(() => {
         if (ctx.destroyed) return;
-        // CARTO basemaps now watermark tiles without an API key — use OSM tiles (attribution required)
+        // CARTO basemaps now watermark tiles without an API key — use OSM tiles (attribution required).
+        // HA sets <meta name="referrer" content="same-origin">, and OSM blocks tile requests without
+        // a Referer, so send the origin explicitly for tile images.
         const map = window.L.map(container, { zoomControl: true, attributionControl: true }).setView([lat, lng], 16);
         map.attributionControl.setPrefix(false);
         window.L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
+          maxZoom: 19, referrerPolicy: "strict-origin-when-cross-origin",
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
         }).addTo(map);
         ctx.map = map;
 
