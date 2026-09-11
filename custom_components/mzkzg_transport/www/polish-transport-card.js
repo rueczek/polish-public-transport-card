@@ -4,7 +4,7 @@
  * Reads data from mzkzg_transport HA integration sensors.
  */
 
-const MZKZG_VERSION = "1.5.0";
+const MZKZG_VERSION = "1.6.0";
 
 const LOCALE = {
   pl: {
